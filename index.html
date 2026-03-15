@@ -19,7 +19,7 @@
 
       <section class="card">
         <h2>Monthly Budget</h2>
-        <div class="grid two">
+        <div class="grid three">
           <label>
             Monthly income
             <input id="income" type="number" min="0" step="0.01" placeholder="3200" />
@@ -103,6 +103,10 @@
           <label class="radio" data-tooltip="Pays smallest balance first for fast wins">
             <input type="radio" name="strategy" value="snowball" />
             Snowball (smallest balance first)
+          </label>
+          <label class="radio" data-tooltip="Blends APR and balance for steady wins with interest savings">
+            <input type="radio" name="strategy" value="hybrid" />
+            Hybrid (balance + APR blend)
           </label>
         </div>
         <label class="switch" data-tooltip="Highlight the next debt you can finish quickly">

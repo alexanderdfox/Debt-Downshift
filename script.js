@@ -176,6 +176,28 @@ function getEffectiveApr(debt) {
 }
 
 function pickOrder(debts, strategy) {
+  if (strategy === "hybrid") {
+    const active = debts.filter((debt) => debt.balance > 0);
+    if (!active.length) return [];
+    const balances = active.map((debt) => debt.balance);
+    const aprs = active.map((debt) => getEffectiveApr(debt));
+    const minBalance = Math.min(...balances);
+    const maxBalance = Math.max(...balances);
+    const minApr = Math.min(...aprs);
+    const maxApr = Math.max(...aprs);
+    const balanceRange = Math.max(maxBalance - minBalance, 1);
+    const aprRange = Math.max(maxApr - minApr, 1);
+    const score = (debt) => {
+      const balanceScore = (debt.balance - minBalance) / balanceRange;
+      const aprScore = (maxApr - getEffectiveApr(debt)) / aprRange;
+      return balanceScore * 0.5 + aprScore * 0.5;
+    };
+    return debts
+      .slice()
+      .sort((a, b) => score(a) - score(b))
+      .filter((debt) => debt.balance > 0);
+  }
+
   const sorted = debts.slice().sort((a, b) => {
     if (strategy === "snowball") {
       return a.balance - b.balance;
