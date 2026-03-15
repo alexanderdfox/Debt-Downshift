@@ -581,6 +581,39 @@ button:focus-visible {
   box-shadow: 0 12px 24px rgba(93, 217, 193, 0.18);
 }
 
+.print-summary {
+  display: none;
+}
+
+.print-grid {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+}
+
+.print-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.95rem;
+}
+
+.print-table th,
+.print-table td {
+  padding: 8px 10px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  text-align: left;
+}
+
+.print-table th {
+  font-weight: 700;
+  font-family: var(--font-title);
+}
+
+.print-table.dense th,
+.print-table.dense td {
+  padding: 6px 8px;
+}
+
 [data-tooltip] {
   position: relative;
 }
@@ -669,6 +702,19 @@ button:focus-visible {
     font-size: 11px;
   }
 
+  * {
+    color: #111 !important;
+  }
+
+  .app {
+    padding: 0;
+    gap: 6px;
+  }
+
+  .hero {
+    display: none;
+  }
+
   .tips,
   .actions,
   .compare,
@@ -677,24 +723,17 @@ button:focus-visible {
   .plan,
   .debt-list,
   .bill-list,
-  .filters {
+  .filters,
+  #results,
+  .card:not(.print-summary),
+  .print-summary {
     display: none;
   }
 
-  .hero {
+  .print-summary {
     display: block;
-    padding: 0 0 12px;
-    background: none;
-    box-shadow: none;
-    border-radius: 0;
-  }
-
-  .hero::after {
-    display: none;
-  }
-
-  .eyebrow {
-    color: #444;
+    padding: 0;
+    border: none;
   }
 
   .card {
@@ -706,22 +745,18 @@ button:focus-visible {
     page-break-inside: avoid;
   }
 
-  .app {
-    padding: 0;
-    gap: 8px;
-  }
-
   h1,
   h2,
   h3 {
     color: #111;
+    margin-bottom: 6px;
   }
 
   .subhead,
   .hint,
   .label,
   .value.small {
-    color: #555;
+    color: #111;
   }
 
   body.debt-present .value,
@@ -729,7 +764,11 @@ button:focus-visible {
   body.debt-present #interest,
   body.debt-present #avalanche-interest,
   body.debt-present #snowball-interest {
-    color: #b00020;
+    color: #b00020 !important;
+  }
+
+  body.debt-present .print-summary td {
+    color: #b00020 !important;
   }
 
   input,
@@ -753,40 +792,17 @@ button:focus-visible {
     display: none;
   }
 
-  .result-grid {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+  .print-grid {
+    gap: 8px;
   }
 
-  .value {
-    font-size: 1.1rem;
+  .print-table {
+    font-size: 11px;
   }
 
-  .best-way,
-  .target {
-    border: 1px solid #ddd;
-  }
-
-  .debt-row,
-  .bill-row {
-    box-shadow: none;
-    border: 1px solid #eee;
-    background: #fff;
-  }
-
-  .debt-fields {
-    grid-template-columns: 1.6fr repeat(4, minmax(90px, 1fr)) minmax(120px, 1fr) auto;
-  }
-
-  .notes {
-    font-size: 0.85rem;
-  }
-
-  .plan-item {
-    background: #fff;
-    border: 1px solid #eee;
-  }
-
-  .card {
-    padding: 12px;
+  .print-table th,
+  .print-table td {
+    padding: 4px 6px;
+    border-color: #ddd;
   }
 }

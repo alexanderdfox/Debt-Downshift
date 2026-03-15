@@ -36,6 +36,19 @@ const resetButton = document.getElementById("reset-data");
 const exportCsvButton = document.getElementById("export-csv");
 const importCsvInput = document.getElementById("import-csv");
 const printSummaryButton = document.getElementById("print-summary");
+const printSummarySection = document.getElementById("print-summary-section");
+const printIncomeEl = document.getElementById("print-income");
+const printEssentialsEl = document.getElementById("print-essentials");
+const printMinimumsEl = document.getElementById("print-minimums");
+const printSurplusEl = document.getElementById("print-surplus");
+const printShortfallEl = document.getElementById("print-shortfall");
+const printStrategyEl = document.getElementById("print-strategy");
+const printOrderEl = document.getElementById("print-order");
+const printMonthsEl = document.getElementById("print-months");
+const printInterestEl = document.getElementById("print-interest");
+const printTargetEl = document.getElementById("print-target");
+const printDebtsBody = document.querySelector("#print-debts tbody");
+const printBillsBody = document.querySelector("#print-bills tbody");
 
 const levelEl = document.getElementById("level");
 const xpEl = document.getElementById("xp");
@@ -515,6 +528,63 @@ function updatePlan() {
   const current = simulatePlan(debts, strategy, options);
   const avalanche = simulatePlan(debts, "avalanche", options);
   const snowball = simulatePlan(debts, "snowball", options);
+
+  if (printSummarySection) {
+    const maxPrintDebts = 12;
+    const maxPrintBills = 10;
+    printIncomeEl.textContent = formatter.format(income);
+    printEssentialsEl.textContent = formatter.format(essentials);
+    printMinimumsEl.textContent = formatter.format(minPayments);
+    printSurplusEl.textContent = formatter.format(surplus);
+    printShortfallEl.textContent = formatter.format(shortfall);
+    printStrategyEl.textContent =
+      strategy.charAt(0).toUpperCase() + strategy.slice(1);
+    const orderText =
+      pickOrder(debts, strategy)
+        .map((debt) => debt.name)
+        .join(" → ") || "-";
+    printOrderEl.textContent = orderText;
+    printMonthsEl.textContent = current.months.toString();
+    printInterestEl.textContent = formatter.format(current.totalInterest);
+    printTargetEl.textContent = targetDateInput.value || "-";
+
+    const shownDebts = debts.slice(0, maxPrintDebts);
+    const remainingDebts = Math.max(debts.length - shownDebts.length, 0);
+    printDebtsBody.innerHTML = shownDebts.length
+      ? shownDebts
+          .map(
+            (debt) => `
+        <tr>
+          <td>${debt.name}</td>
+          <td>${formatter.format(debt.balance)}</td>
+          <td>${debt.apr ? `${debt.apr}%` : "-"}</td>
+          <td>${formatter.format(debt.min)}</td>
+          <td>${debt.category}</td>
+        </tr>`
+          )
+          .join("")
+      : `<tr><td colspan="5">No debts listed.</td></tr>`;
+    if (remainingDebts > 0) {
+      printDebtsBody.innerHTML += `<tr><td colspan="5">And ${remainingDebts} more debts...</td></tr>`;
+    }
+
+    const shownBills = bills.slice(0, maxPrintBills);
+    const remainingBills = Math.max(bills.length - shownBills.length, 0);
+    printBillsBody.innerHTML = shownBills.length
+      ? shownBills
+          .map(
+            (bill) => `
+        <tr>
+          <td>${bill.name}</td>
+          <td>${formatter.format(bill.amount)}</td>
+        </tr>`
+          )
+          .join("")
+      : `<tr><td colspan="2">No bills listed.</td></tr>`;
+    if (remainingBills > 0) {
+      printBillsBody.innerHTML += `<tr><td colspan="2">And ${remainingBills} more bills...</td></tr>`;
+    }
+  }
 
   monthsEl.textContent = current.months.toString();
   interestEl.textContent = formatter.format(current.totalInterest);
