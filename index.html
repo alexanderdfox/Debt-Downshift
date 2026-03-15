@@ -29,35 +29,86 @@
             <input id="essentials" type="number" min="0" step="0.01" placeholder="2100" />
           </label>
         </div>
+        <div class="grid three">
+          <label>
+            Monthly income growth %
+            <input id="income-growth" type="number" min="-10" max="20" step="0.1" placeholder="0.0" />
+          </label>
+          <label>
+            Annual bonus
+            <input id="annual-bonus" type="number" min="0" step="0.01" placeholder="0" />
+          </label>
+          <label>
+            Target payoff date
+            <input id="target-date" type="date" />
+          </label>
+        </div>
         <div class="hint">
-          Essentials include rent, utilities, food, transit, insurance, and
-          minimum debt payments.
+          Essentials include rent, utilities, food, transit, and insurance. Add
+          minimum debt payments in the debt list.
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="card-head">
+          <h2>Monthly Bills</h2>
+          <button id="add-bill" class="ghost" type="button" data-tooltip="Add another bill">
+            Add bill
+          </button>
+        </div>
+        <div class="bill-list" id="bill-list"></div>
+        <div class="hint">
+          These are recurring monthly bills. They are added to essentials.
         </div>
       </section>
 
       <section class="card">
         <div class="card-head">
           <h2>Debts</h2>
-          <button id="add-debt" class="ghost" type="button">Add debt</button>
+          <button id="add-debt" class="ghost" type="button" data-tooltip="Add another debt line">
+            Add debt
+          </button>
+        </div>
+        <div class="filters">
+          <label>
+            Search
+            <input id="search-debts" type="text" placeholder="Credit, auto, medical" />
+          </label>
+          <label>
+            Category filter
+            <select id="filter-category">
+              <option value="all">All categories</option>
+              <option value="credit">Credit card</option>
+              <option value="loan">Loan</option>
+              <option value="student">Student</option>
+              <option value="medical">Medical</option>
+              <option value="other">Other</option>
+            </select>
+          </label>
         </div>
         <div class="debt-list" id="debt-list"></div>
         <div class="hint">
-          Add each balance with its APR and minimum payment.
+          Add each balance with its APR, optional refinance APR, minimum payment,
+          and notes.
         </div>
       </section>
 
       <section class="card">
         <h2>Payoff Strategy</h2>
         <div class="grid two">
-          <label class="radio">
+          <label class="radio" data-tooltip="Pays highest APR first to save interest">
             <input type="radio" name="strategy" value="avalanche" checked />
             Avalanche (highest APR first)
           </label>
-          <label class="radio">
+          <label class="radio" data-tooltip="Pays smallest balance first for fast wins">
             <input type="radio" name="strategy" value="snowball" />
             Snowball (smallest balance first)
           </label>
         </div>
+        <label class="switch" data-tooltip="Highlight the next debt you can finish quickly">
+          <input id="small-win" type="checkbox" />
+          Small win mode: highlight your next payoff target.
+        </label>
       </section>
 
       <section class="card tips">
@@ -81,23 +132,47 @@
       <section class="card actions">
         <h2>Quick Updates</h2>
         <div class="action-grid">
-          <button id="apply-payments" class="primary" type="button">
+          <button id="apply-payments" class="primary" type="button" data-tooltip="Quickly apply a one-time payment to each debt">
             Apply one-time payments
           </button>
-          <button id="export-csv" class="ghost" type="button">
+          <button id="export-csv" class="ghost" type="button" data-tooltip="Download your debts as a CSV file">
             Export CSV
           </button>
-          <label class="file-input ghost">
+          <label class="file-input ghost" data-tooltip="Upload a CSV to restore debts">
             Import CSV
             <input id="import-csv" type="file" accept=".csv" />
           </label>
-          <button id="reset-data" class="ghost" type="button">
+          <button id="print-summary" class="ghost" type="button" data-tooltip="Print a clean plan summary">
+            Print summary
+          </button>
+          <button id="reset-data" class="ghost" type="button" data-tooltip="Clear all saved data">
             Clear all data
           </button>
         </div>
         <div class="hint">
           One-time payments reduce balances instantly and recalculate the plan.
         </div>
+      </section>
+
+      <section class="card compare">
+        <h2>Strategy Showdown</h2>
+        <div class="compare-grid">
+          <div class="compare-card" id="avalanche-card">
+            <h3>Avalanche</h3>
+            <p class="label">Months to payoff</p>
+            <p class="value" id="avalanche-months">0</p>
+            <p class="label">Total interest</p>
+            <p class="value small" id="avalanche-interest">$0</p>
+          </div>
+          <div class="compare-card" id="snowball-card">
+            <h3>Snowball</h3>
+            <p class="label">Months to payoff</p>
+            <p class="value" id="snowball-months">0</p>
+            <p class="label">Total interest</p>
+            <p class="value small" id="snowball-interest">$0</p>
+          </div>
+        </div>
+        <p class="hint" id="compare-summary">Add debts to compare strategies.</p>
       </section>
 
       <section class="card results" id="results">
@@ -116,6 +191,10 @@
             <p class="value" id="extra">$0</p>
           </div>
           <div>
+            <p class="label">Monthly shortfall</p>
+            <p class="value" id="shortfall">$0</p>
+          </div>
+          <div>
             <p class="label">Strategy order</p>
             <p class="value small" id="order">Add debts to see order</p>
           </div>
@@ -127,6 +206,14 @@
             <p class="label">Total interest paid</p>
             <p class="value" id="interest">$0</p>
           </div>
+          <div>
+            <p class="label">Late fees</p>
+            <p class="value" id="late-fees">$0</p>
+          </div>
+        </div>
+        <div class="target" id="target">
+          <h3>Target payoff date</h3>
+          <p id="target-message">Set a target date to see the required extra payment.</p>
         </div>
         <div class="best-way" id="best-way">
           <h3>Best way to pay each month</h3>
@@ -136,17 +223,85 @@
             <li>When a debt hits $0, roll its minimum into the next debt.</li>
           </ol>
         </div>
+        <div class="timeline">
+          <div class="timeline-head">
+            <h3>Payoff timeline</h3>
+            <p class="label">Total balance over time</p>
+          </div>
+          <label class="slider">
+            Highlight month
+            <input id="timeline-slider" type="range" min="1" max="1" value="1" />
+            <span id="timeline-month">Month 1</span>
+          </label>
+          <canvas id="timeline" width="900" height="240"></canvas>
+        </div>
         <div class="plan" id="plan"></div>
+      </section>
+
+      <section class="card game">
+        <h2>Progress HQ</h2>
+        <div class="game-grid">
+          <div class="game-card">
+            <p class="label">Level</p>
+            <p class="value" id="level">1</p>
+          </div>
+          <div class="game-card">
+            <p class="label">XP</p>
+            <p class="value" id="xp">0</p>
+          </div>
+          <div class="game-card">
+            <p class="label">Review streak</p>
+            <p class="value" id="streak">0</p>
+          </div>
+          <div class="game-card">
+            <p class="label">Debt cleared</p>
+            <p class="value" id="progress">0%</p>
+          </div>
+        </div>
+        <div class="progress-bar">
+          <div class="progress-fill" id="progress-fill"></div>
+        </div>
+        <div class="game-actions">
+          <button id="mark-review" class="primary" type="button" data-tooltip="Log this month's update and build your streak">
+            Mark monthly review
+          </button>
+          <button id="set-baseline" class="ghost" type="button" data-tooltip="Reset progress based on today's total debt">
+            Set baseline
+          </button>
+        </div>
+        <div class="achievements" id="achievements"></div>
+        <div class="next-win" id="next-win">
+          Next win: add debts to see your first target.
+        </div>
       </section>
     </main>
 
     <template id="debt-row">
       <div class="debt-row">
-        <input class="name" type="text" placeholder="Credit card" />
-        <input class="balance" type="number" min="0" step="0.01" placeholder="1200" />
-        <input class="apr" type="number" min="0" step="0.01" placeholder="19.99" />
-        <input class="min" type="number" min="0" step="0.01" placeholder="45" />
-        <button class="remove" type="button" aria-label="Remove debt">Remove</button>
+        <div class="debt-fields">
+          <input class="name" type="text" placeholder="Credit card" />
+          <input class="balance" type="number" min="0" step="0.01" placeholder="1200" />
+          <input class="apr" type="number" min="0" step="0.01" placeholder="19.99" />
+          <input class="refi" type="number" min="0" step="0.01" placeholder="Refi APR" />
+          <input class="min" type="number" min="0" step="0.01" placeholder="Min pay" />
+          <select class="category">
+            <option value="credit">Credit card</option>
+            <option value="loan">Loan</option>
+            <option value="student">Student</option>
+            <option value="medical">Medical</option>
+            <option value="other">Other</option>
+          </select>
+          <button class="remove" type="button" aria-label="Remove debt">Remove</button>
+        </div>
+        <input class="notes" type="text" placeholder="Notes (due date, autopay, etc.)" />
+      </div>
+    </template>
+
+    <template id="bill-row">
+      <div class="bill-row">
+        <input class="bill-name" type="text" placeholder="Internet" />
+        <input class="bill-amount" type="number" min="0" step="0.01" placeholder="65" />
+        <button class="remove" type="button" aria-label="Remove bill">Remove</button>
       </div>
     </template>
 
