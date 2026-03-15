@@ -233,8 +233,17 @@ function simulatePlan(debts, strategy, options) {
 
     for (const debt of ordered) {
       if (debt.balance <= 0) continue;
+      const monthlyRate = debt.apr / 100 / 12;
+      const interest = debt.balance * monthlyRate;
+      totalInterest += interest;
+      debt.balance += interest;
+
       const minPayment = debt.min * minScale;
-      const missedMin = minPayment + 0.01 < debt.min;
+      const payment = Math.min(debt.balance, minPayment + extra);
+      debt.balance -= payment;
+      extra = Math.max(extra - (payment - minPayment), 0);
+
+      const missedMin = payment + 0.01 < debt.min && debt.balance > 0;
       if (missedMin) {
         totalLateFees += LATE_FEE;
         debt.balance += LATE_FEE;
@@ -243,14 +252,6 @@ function simulatePlan(debts, strategy, options) {
           MAX_PENALTY_APR
         );
       }
-      const monthlyRate = debt.apr / 100 / 12;
-      const interest = debt.balance * monthlyRate;
-      totalInterest += interest;
-      debt.balance += interest;
-
-      const payment = Math.min(debt.balance, minPayment + extra);
-      debt.balance -= payment;
-      extra = Math.max(extra - (payment - minPayment), 0);
     }
 
     const totalBalance = working.reduce(
