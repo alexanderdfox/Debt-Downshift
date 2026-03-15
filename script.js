@@ -15,7 +15,6 @@ const surplusEl = document.getElementById("surplus");
 const orderEl = document.getElementById("order");
 const monthsEl = document.getElementById("months");
 const interestEl = document.getElementById("interest");
-const lateFeesEl = document.getElementById("late-fees");
 const planEl = document.getElementById("plan");
 const minimumsEl = document.getElementById("minimums");
 const extraEl = document.getElementById("extra");
@@ -57,9 +56,6 @@ const formatter = new Intl.NumberFormat("en-US", {
   maximumFractionDigits: 0,
 });
 
-const LATE_FEE = 35;
-const PENALTY_APR_BPS = 500;
-const MAX_PENALTY_APR = 36;
 
 const META_KEY = "debt-downshift-meta";
 let debtIdCounter = 1;
@@ -206,7 +202,6 @@ function simulatePlan(debts, strategy, options) {
   }));
 
   let totalInterest = 0;
-  let totalLateFees = 0;
   let month = 0;
   const plan = [];
   const timeline = [];
@@ -243,15 +238,6 @@ function simulatePlan(debts, strategy, options) {
       debt.balance -= payment;
       extra = Math.max(extra - (payment - minPayment), 0);
 
-      const missedMin = payment + 0.01 < debt.min && debt.balance > 0;
-      if (missedMin) {
-        totalLateFees += LATE_FEE;
-        debt.balance += LATE_FEE;
-        debt.apr = Math.min(
-          debt.apr + PENALTY_APR_BPS / 100,
-          MAX_PENALTY_APR
-        );
-      }
     }
 
     const totalBalance = working.reduce(
@@ -269,7 +255,7 @@ function simulatePlan(debts, strategy, options) {
     }
   }
 
-  return { months: month, totalInterest, totalLateFees, plan, timeline };
+  return { months: month, totalInterest, plan, timeline };
 }
 
 function monthsUntil(targetDate) {
@@ -506,7 +492,6 @@ function updatePlan() {
 
   monthsEl.textContent = current.months.toString();
   interestEl.textContent = formatter.format(current.totalInterest);
-  lateFeesEl.textContent = formatter.format(current.totalLateFees);
   planEl.innerHTML = current.plan
     .map((item) => `<div class="plan-item"><strong>${item}</strong></div>`)
     .join("");
