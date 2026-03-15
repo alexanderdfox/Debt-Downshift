@@ -1,0 +1,155 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Debt Downshift</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main class="app">
+      <header class="hero">
+        <p class="eyebrow">Free debt payoff planner</p>
+        <h1>Debt Downshift</h1>
+        <p class="subhead">
+          A no-cost payoff tool that compares avalanche vs snowball and builds a
+          simple monthly plan.
+        </p>
+      </header>
+
+      <section class="card">
+        <h2>Monthly Budget</h2>
+        <div class="grid two">
+          <label>
+            Monthly income
+            <input id="income" type="number" min="0" step="0.01" placeholder="3200" />
+          </label>
+          <label>
+            Monthly essentials
+            <input id="essentials" type="number" min="0" step="0.01" placeholder="2100" />
+          </label>
+        </div>
+        <div class="hint">
+          Essentials include rent, utilities, food, transit, insurance, and
+          minimum debt payments.
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="card-head">
+          <h2>Debts</h2>
+          <button id="add-debt" class="ghost" type="button">Add debt</button>
+        </div>
+        <div class="debt-list" id="debt-list"></div>
+        <div class="hint">
+          Add each balance with its APR and minimum payment.
+        </div>
+      </section>
+
+      <section class="card">
+        <h2>Payoff Strategy</h2>
+        <div class="grid two">
+          <label class="radio">
+            <input type="radio" name="strategy" value="avalanche" checked />
+            Avalanche (highest APR first)
+          </label>
+          <label class="radio">
+            <input type="radio" name="strategy" value="snowball" />
+            Snowball (smallest balance first)
+          </label>
+        </div>
+      </section>
+
+      <section class="card tips">
+        <h2>Tips to Keep You Updating</h2>
+        <div class="tips-grid">
+          <div class="tip">
+            <h3>Monthly check-in</h3>
+            <p>Review balances and rates once a month so the plan stays accurate.</p>
+          </div>
+          <div class="tip">
+            <h3>Track windfalls</h3>
+            <p>Apply bonuses or tax refunds directly to your top priority debt.</p>
+          </div>
+          <div class="tip">
+            <h3>Keep essentials real</h3>
+            <p>Update rent, utilities, and minimum payments as bills change.</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="card actions">
+        <h2>Quick Updates</h2>
+        <div class="action-grid">
+          <button id="apply-payments" class="primary" type="button">
+            Apply one-time payments
+          </button>
+          <button id="export-csv" class="ghost" type="button">
+            Export CSV
+          </button>
+          <label class="file-input ghost">
+            Import CSV
+            <input id="import-csv" type="file" accept=".csv" />
+          </label>
+          <button id="reset-data" class="ghost" type="button">
+            Clear all data
+          </button>
+        </div>
+        <div class="hint">
+          One-time payments reduce balances instantly and recalculate the plan.
+        </div>
+      </section>
+
+      <section class="card results" id="results">
+        <h2>Plan</h2>
+        <div class="result-grid">
+          <div>
+            <p class="label">Monthly surplus</p>
+            <p class="value" id="surplus">$0</p>
+          </div>
+          <div>
+            <p class="label">Minimum payments</p>
+            <p class="value" id="minimums">$0</p>
+          </div>
+          <div>
+            <p class="label">Extra to priority debt</p>
+            <p class="value" id="extra">$0</p>
+          </div>
+          <div>
+            <p class="label">Strategy order</p>
+            <p class="value small" id="order">Add debts to see order</p>
+          </div>
+          <div>
+            <p class="label">Estimated months to payoff</p>
+            <p class="value" id="months">0</p>
+          </div>
+          <div>
+            <p class="label">Total interest paid</p>
+            <p class="value" id="interest">$0</p>
+          </div>
+        </div>
+        <div class="best-way" id="best-way">
+          <h3>Best way to pay each month</h3>
+          <ol>
+            <li>Cover essentials and make every minimum payment.</li>
+            <li>Send the remaining <span id="extra-inline">$0</span> to the first debt in the strategy order.</li>
+            <li>When a debt hits $0, roll its minimum into the next debt.</li>
+          </ol>
+        </div>
+        <div class="plan" id="plan"></div>
+      </section>
+    </main>
+
+    <template id="debt-row">
+      <div class="debt-row">
+        <input class="name" type="text" placeholder="Credit card" />
+        <input class="balance" type="number" min="0" step="0.01" placeholder="1200" />
+        <input class="apr" type="number" min="0" step="0.01" placeholder="19.99" />
+        <input class="min" type="number" min="0" step="0.01" placeholder="45" />
+        <button class="remove" type="button" aria-label="Remove debt">Remove</button>
+      </div>
+    </template>
+
+    <script src="script.js"></script>
+  </body>
+</html>
