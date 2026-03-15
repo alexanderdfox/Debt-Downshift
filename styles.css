@@ -658,19 +658,43 @@ button:focus-visible {
 }
 
 @media print {
+  @page {
+    size: letter;
+    margin: 0.5in;
+  }
+
   body {
     background: #fff;
     color: #111;
+    font-size: 11px;
   }
 
-  .hero,
   .tips,
   .actions,
   .compare,
   .game,
   .timeline,
-  .plan {
+  .plan,
+  .debt-list,
+  .bill-list,
+  .filters {
     display: none;
+  }
+
+  .hero {
+    display: block;
+    padding: 0 0 12px;
+    background: none;
+    box-shadow: none;
+    border-radius: 0;
+  }
+
+  .hero::after {
+    display: none;
+  }
+
+  .eyebrow {
+    color: #444;
   }
 
   .card {
@@ -683,8 +707,8 @@ button:focus-visible {
   }
 
   .app {
-    padding: 16px;
-    gap: 12px;
+    padding: 0;
+    gap: 8px;
   }
 
   h1,
@@ -693,12 +717,48 @@ button:focus-visible {
     color: #111;
   }
 
+  .subhead,
+  .hint,
+  .label,
+  .value.small {
+    color: #555;
+  }
+
+  body.debt-present .value,
+  body.debt-present #shortfall,
+  body.debt-present #interest,
+  body.debt-present #avalanche-interest,
+  body.debt-present #snowball-interest {
+    color: #b00020;
+  }
+
+  input,
+  select {
+    background: #fff;
+    color: #111;
+    border: 1px solid #ddd;
+    box-shadow: none;
+  }
+
+  .ghost,
+  .primary,
+  .file-input,
+  .remove,
+  button {
+    display: none;
+  }
+
+  [data-tooltip]::before,
+  [data-tooltip]::after {
+    display: none;
+  }
+
   .result-grid {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 
   .value {
-    font-size: 1.2rem;
+    font-size: 1.1rem;
   }
 
   .best-way,
@@ -710,6 +770,7 @@ button:focus-visible {
   .bill-row {
     box-shadow: none;
     border: 1px solid #eee;
+    background: #fff;
   }
 
   .debt-fields {
@@ -717,6 +778,15 @@ button:focus-visible {
   }
 
   .notes {
-    font-size: 0.9rem;
+    font-size: 0.85rem;
+  }
+
+  .plan-item {
+    background: #fff;
+    border: 1px solid #eee;
+  }
+
+  .card {
+    padding: 12px;
   }
 }

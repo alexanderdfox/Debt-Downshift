@@ -460,6 +460,10 @@ function updatePlan() {
   const annualBonus = Number(annualBonusInput.value) || 0;
   const debts = parseDebts();
   const bills = parseBills();
+  document.body.classList.toggle(
+    "debt-present",
+    debts.some((debt) => debt.balance > 0)
+  );
   const strategy =
     document.querySelector("input[name='strategy']:checked")?.value ||
     "avalanche";
@@ -597,8 +601,8 @@ function updatePlan() {
   updateGame(debts);
 }
 
-function saveState() {
-  const payload = {
+function getStatePayload() {
+  return {
     income: Number(incomeInput.value) || 0,
     essentials: Number(essentialsInput.value) || 0,
     incomeGrowth: Number(incomeGrowthInput.value) || 0,
@@ -611,6 +615,10 @@ function saveState() {
     debts: parseDebts(),
     bills: parseBills(),
   };
+}
+
+function saveState() {
+  const payload = getStatePayload();
   localStorage.setItem("debt-downshift", JSON.stringify(payload));
 }
 
@@ -684,6 +692,23 @@ function csvEscape(value) {
     return `"${text.replace(/"/g, '""')}"`;
   }
   return text;
+}
+
+function exportAllData() {
+  const payload = getStatePayload();
+  const meta = loadMeta();
+  const data = { ...payload, meta };
+  const blob = new Blob([JSON.stringify(data, null, 2)], {
+    type: "application/json",
+  });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = "debt-downshift.json";
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  URL.revokeObjectURL(url);
 }
 
 function exportCsv() {
@@ -790,6 +815,53 @@ function importCsv(file) {
   reader.readAsText(file);
 }
 
+function applyPayload(payload) {
+  incomeInput.value = payload.income ?? "";
+  essentialsInput.value = payload.essentials ?? "";
+  incomeGrowthInput.value = payload.incomeGrowth ?? "";
+  annualBonusInput.value = payload.annualBonus ?? "";
+  targetDateInput.value = payload.targetDate ?? "";
+  smallWinInput.checked = Boolean(payload.smallWinMode);
+  document.querySelectorAll("input[name='strategy']").forEach((input) => {
+    input.checked = input.value === (payload.strategy || "avalanche");
+  });
+  debtList.innerHTML = "";
+  (payload.debts || []).forEach((debt) => createDebtRow(debt));
+  billList.innerHTML = "";
+  (payload.bills || []).forEach((bill) => createBillRow(bill));
+  updatePlan();
+  saveState();
+}
+
+function importAllData(file) {
+  const reader = new FileReader();
+  reader.onload = () => {
+    const text = String(reader.result || "");
+    const trimmed = text.trim();
+    if (trimmed.startsWith("{")) {
+      try {
+        const payload = JSON.parse(trimmed);
+        if (payload && typeof payload === "object") {
+          applyPayload(payload);
+          if (payload.meta && typeof payload.meta === "object") {
+            saveMeta({
+              baselineTotal: payload.meta.baselineTotal ?? null,
+              lastReview: payload.meta.lastReview ?? null,
+              streak: payload.meta.streak ?? 0,
+            });
+            updatePlan();
+          }
+          return;
+        }
+      } catch (err) {
+        // fall through to CSV handler
+      }
+    }
+    importCsv(file);
+  };
+  reader.readAsText(file);
+}
+
 function markMonthlyReview() {
   const meta = loadMeta();
   const now = new Date();
@@ -849,10 +921,10 @@ searchInput.addEventListener("input", applyFilters);
 filterCategory.addEventListener("change", applyFilters);
 applyPaymentsButton.addEventListener("click", applyOneTimePayments);
 resetButton.addEventListener("click", resetAll);
-exportCsvButton.addEventListener("click", exportCsv);
+exportCsvButton.addEventListener("click", exportAllData);
 importCsvInput.addEventListener("change", (event) => {
   const file = event.target.files?.[0];
-  if (file) importCsv(file);
+  if (file) importAllData(file);
   event.target.value = "";
 });
 printSummaryButton.addEventListener("click", () => window.print());
